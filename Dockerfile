@@ -1,5 +1,5 @@
 # Use the official Java runtime as a parent image
-FROM openjdk:17-jdk-alpine
+FROM eclipse-temurin:17-jdk-alpine
 
 # Set the working directory in the container to /app
 WORKDIR /app
