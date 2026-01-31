@@ -1,180 +1,161 @@
-🚀 Spring Boot CI/CD Pipeline using AWS (GitHub → CodeBuild → ECR → ECS)
+# 🚀 Spring Boot CI/CD Pipeline on AWS
 
-This repository demonstrates a complete CI/CD pipeline for deploying a Spring Boot application to AWS ECS using Docker, Amazon ECR, AWS CodeBuild, and AWS CodePipeline.
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/your-repo)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-The pipeline is fully automated — any push to GitHub triggers a new deployment.
+This repository demonstrates a complete CI/CD pipeline for deploying a Spring Boot application to AWS ECS using Docker, Amazon ECR, AWS CodeBuild, and AWS CodePipeline. The pipeline is fully automated — any push to GitHub triggers a new deployment.
 
-🧩 Architecture Overview
+---
 
-High-level Flow
+## 📦 Quick Start
 
-Developer pushes code to GitHub
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-repo/cicd-new.git
+   cd cicd-new
+   ```
+2. **Build the project locally:**
+   ```bash
+   mvn clean package
+   ```
+3. **Run with Docker:**
+   ```bash
+   docker build -t spring-cicd-demo .
+   docker run -p 8080:8080 spring-cicd-demo
+   ```
 
-AWS CodePipeline detects the change
+## 🛠️ Prerequisites
+- Java 17+
+- Maven 3.6+
+- Docker
+- AWS CLI (configured)
+- AWS Account with permissions for ECS, ECR, CodeBuild, CodePipeline
 
-AWS CodeBuild builds the application & Docker image
+## 🧑‍💻 Local Development
+- To run without Docker:
+  ```bash
+  mvn spring-boot:run
+  ```
+- Access the app at [http://localhost:8080](http://localhost:8080)
 
-Docker image is pushed to Amazon ECR
+---
 
-AWS ECS pulls the image and runs the container
+## 🧩 Architecture Overview
 
-🛠️ Tech Stack
+**High-level Flow:**
+1. Developer pushes code to GitHub
+2. AWS CodePipeline detects the change
+3. AWS CodeBuild builds the application & Docker image
+4. Docker image is pushed to Amazon ECR
+5. AWS ECS pulls the image and runs the container
 
-Spring Boot – Backend application
+![Architecture Diagram](docs/ci-cd.png)
 
-Docker – Containerization
+## 🛠️ Tech Stack
+- Spring Boot – Backend application
+- Docker – Containerization
+- GitHub – Source code repository
+- AWS CodeBuild – CI (Build & Docker image creation)
+- Amazon ECR – Docker image registry
+- AWS ECS (Fargate) – Container orchestration
+- AWS CodePipeline – CD (deployment automation)
 
-GitHub – Source code repository
+---
 
-AWS CodeBuild – CI (Build & Docker image creation)
+## 🔄 Detailed CI/CD Flow (Step-by-Step)
 
-Amazon ECR – Docker image registry
+### 1. Spring Boot Application
+- Standard Spring Boot project
+- Dockerfile included to containerize the app
 
-AWS ECS (Fargate) – Container orchestration
+### 2. Docker Image Creation
+- Dockerfile:
+  ```Dockerfile
+  FROM eclipse-temurin:17-jdk-alpine
+  WORKDIR /app
+  COPY target/course-service.jar app.jar
+  EXPOSE 8080
+  ENTRYPOINT ["java","-jar","app.jar"]
+  ```
+- Image is tagged with build ID
 
-AWS CodePipeline – CD (deployment automation)
+### 3. buildspec.yml (CI Instructions)
+- Defines build steps for AWS CodeBuild
+- Runs Maven build, builds Docker image, pushes to ECR, generates `imagedefinitions.json`
 
-🔄 Detailed CI/CD Flow (Step-by-Step)
-Step 1: Spring Boot Application
+### 4. AWS CodeBuild (CI)
+- Triggered by CodePipeline
+- Runs `mvn clean package`, builds/pushes Docker image, outputs artifacts
 
-The application is a standard Spring Boot project.
+### 5. Amazon ECR
+- Stores Docker images securely
+- ECS pulls images directly from ECR
 
-A Dockerfile is included to containerize the application.
+### 6. AWS CodePipeline (CD)
+- Orchestrates the pipeline: Source (GitHub) → Build (CodeBuild) → Deploy (ECS)
+- Any commit triggers the pipeline
 
-FROM eclipse-temurin:17-jdk-alpine
-WORKDIR /app
-COPY target/course-service.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java","-jar","app.jar"]
+### 7. AWS ECS (Fargate) Deployment
+- ECS pulls latest image from ECR, runs containers (Fargate)
+- Handles scaling, restarts, health checks
 
-Step 2: Docker Image Creation
+---
 
-Docker uses the Dockerfile to build an image containing:
-
-Java runtime
-
-Spring Boot JAR
-
-The image is tagged using the build ID.
-
-Step 3: buildspec.yml (CI Instructions)
-
-buildspec.yml defines the build steps for AWS CodeBuild.
-
-Key responsibilities:
-
-Run Maven build
-
-Build Docker image
-
-Push image to Amazon ECR
-
-Generate imagedefinitions.json for ECS deployment
-
-Step 4: AWS CodeBuild (CI)
-
-Triggered automatically by CodePipeline.
-
-CodeBuild performs:
-
-mvn clean package
-
-Docker image build
-
-Docker image push to Amazon ECR
-
-Output:
-
-Docker image in ECR
-
-imagedefinitions.json artifact
-
-Step 5: Amazon Elastic Container Registry (ECR)
-
-Stores Docker images securely.
-
-Each build pushes a new versioned image.
-
-ECS pulls images directly from ECR.
-
-Step 6: AWS CodePipeline (CD)
-
-Orchestrates the entire pipeline.
-
-Stages:
-
-Source – GitHub
-
-Build – CodeBuild
-
-Deploy – ECS
-
-Any commit to GitHub automatically triggers the pipeline.
-
-Step 7: AWS ECS (Fargate) Deployment
-
-ECS service pulls the latest image from ECR.
-
-Runs containers using Fargate (no EC2 management).
-
-Handles:
-
-Scaling
-
-Restarts
-
-Health checks
-
-📁 Repository Structure
+## 📁 Repository Structure
+```
 .
 ├── src/                     # Spring Boot source code
 ├── Dockerfile               # Docker image definition
-├── buildspec.yml             # CodeBuild instructions
-├── pom.xml                   # Maven configuration
+├── buildspec.yml            # CodeBuild instructions
+├── pom.xml                  # Maven configuration
 ├── docs/
 │   └── cicd-architecture.png
 └── README.md
+```
 
-✅ Key Benefits of This Setup
+---
 
-Fully automated CI/CD
+## ✅ Key Benefits
+- Fully automated CI/CD
+- No manual deployments
+- Scalable & production-ready
+- Dockerized microservice architecture
+- Cloud-native AWS services
 
-No manual deployments
+---
 
-Scalable & production-ready
+## 🚦 Deployment Trigger
+- Any push to the main branch triggers the pipeline automatically
+- No manual steps required after initial setup
 
-Dockerized microservice architecture
+---
 
-Cloud-native AWS services
+## 🔐 IAM & Security Notes
+- Ensure the following IAM roles exist:
+  - CodeBuild service role (ECR access)
+  - ECS task execution role
+  - ECS service-linked role
 
-🚦 Deployment Trigger
+---
 
-Any push to the main branch triggers the pipeline automatically
+## 🧠 Future Improvements
+- Add ALB with health checks
+- Enable Spring Boot Actuator
+- Blue/Green deployments
+- Multi-stage Docker builds
+- Infrastructure as Code (CloudFormation / Terraform)
 
-No manual steps required after initial setup.
+---
 
-🔐 IAM & Security Notes
+## 🤝 Contributing
+Contributions are welcome! Please open issues or submit PRs for improvements.
 
-Ensure the following IAM roles exist:
+---
 
-CodeBuild service role (ECR access)
+## 📫 Contact
+For questions or support, open an issue or contact [vbrahmapurkar@gmail.com].
 
-ECS task execution role
+---
 
-ECS service-linked role
-
-🧠 Future Improvements
-
-Add ALB with health checks
-
-Enable Spring Boot Actuator
-
-Blue/Green deployments
-
-Multi-stage Docker builds
-
-Infrastructure as Code (CloudFormation / Terraform)
-
-📌 Conclusion
-
+## 📌 Conclusion
 This project demonstrates a real-world, production-grade CI/CD pipeline for deploying Spring Boot applications on AWS using modern DevOps practices.
